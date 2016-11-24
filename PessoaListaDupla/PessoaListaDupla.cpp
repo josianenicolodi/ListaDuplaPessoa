@@ -1,9 +1,3 @@
-// ListaDuplaPessoa.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
-
-
 #include <stdio.h>  	
 #include <stdlib.h>
 #include <conio.h>
@@ -64,17 +58,54 @@ char inserir(Pessoa **pLista, Pessoa *registro)
 			printf("Ja existe um CPF cadastrado");
 			return '0';
 		}
-		else if (compa > 0) {
-			compa = strcmp(atual->anterior->cpf, registro->cpf);
-
-
-			return '1';
-		}
 		else if (compa < 0) {
+			if (atual->proximo == NULL) {
+				atual->proximo = registro;
+				registro->anterior = atual;
+				return '1';
+			}
+			else
+			{
+				compa = strcmp(atual->proximo->cpf, registro->cpf);
+				if (compa > 0) {
+					registro->proximo = atual->proximo;
+					registro->anterior = atual;
+					atual->proximo->anterior = registro;
+					atual->proximo = registro;
+					return '1';
+				}
+				else {
+					return inserir(&atual->proximo, registro);
+				}
+			}
+		}
+		else if (compa > 0) {
 
-			return '1';
+			if (atual->anterior == NULL) {
+				atual->anterior = registro;
+				registro->proximo = atual;
+				return '1';
+			}
+			else
+			{
+				compa = strcmp(atual->anterior->cpf, registro->cpf);
+				if (compa > 0) {
+					registro->proximo = atual;
+					registro->anterior = atual->anterior;
+					atual->anterior->proximo = registro;
+					atual->anterior = registro;
+					return '1';
+				}
+				else {
+					return inserir(&atual->anterior, registro);
+				}
+			}
 		}
 
+	}
+	else
+	{
+		*pLista = registro;
 	}
 
 
@@ -136,9 +167,9 @@ void cadastrar(Pessoa* listaDupla) {
 	Pessoa *pessoa = (Pessoa *)malloc(sizeof(Pessoa));
 	system("cls");
 	printf("Nome:");
-	gets(pessoa->nome);
+	//gets(pessoa->nome);
 	printf("CPF:");
-	gets(pessoa->cpf);
+	//gets(pessoa->cpf);
 	printf("Altura:");
 	scanf("%f", &pessoa->altura);
 	printf("Peso:");

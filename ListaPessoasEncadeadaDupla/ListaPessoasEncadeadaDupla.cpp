@@ -28,30 +28,25 @@ typedef struct Indice {
 }Indice;
 
 
-
+Indice* InicializaIndiceVazio();
+Indice* InicializaIndice(Pessoa *registro);
 void ImprimePessoa(Pessoa *p) {
 	printf(".......................................................................\n");
 	printf("Nome: %s - CPF: %s \n", p->nome, p->cpf);
 	printf("Altura: %f - Peso: %f \n", p->altura, p->peso);
 	printf(".......................................................................\n");
-
 }
-
 
 Pessoa* GetPrimeiro(Pessoa* fila) {
 
-	Pessoa* pessoaAtual = NULL; 
+	Pessoa* pessoaAtual = NULL;
 	Pessoa* retorno = NULL;
 
 	for (pessoaAtual = fila; pessoaAtual != NULL; pessoaAtual = pessoaAtual->anterior)
 	{
 		retorno = pessoaAtual;
-		printf("Buscando a primeira posição Valida....\n");
 	}
-
-
 	return retorno;
-
 }
 
 void ImprimeCrescente(Pessoa * fila) {
@@ -60,22 +55,9 @@ void ImprimeCrescente(Pessoa * fila) {
 	printf("Lista de Pessoas: \n");
 
 	if (fila != NULL) {
-
-		
-		/*if (atual->nome == NULL) {
-			printf("Lista vazia %s \n", atual->nome);
-		}*/
-
-		/*if (atual->proximo == NULL)
-		{
+		for (atual = GetPrimeiro(fila); atual != NULL; atual = atual->proximo) {
 			ImprimePessoa(atual);
 		}
-		else {*/
-			for (atual = GetPrimeiro(fila); atual != NULL; atual = atual->proximo) {
-				ImprimePessoa(atual);
-			}
-		/*}*/
-
 	}
 	else {
 		printf("Opss, parece que a lista esta vazia....\n");
@@ -100,7 +82,21 @@ Pessoa* buscaPorCPF(Pessoa* atual, char* cpf)
 	else {
 		return buscaPorCPF(atual->proximo, cpf);
 	}
+}
 
+Pessoa* BuscaPorNome(Pessoa* atual, char* nome) {
+	if (atual == NULL) {
+		return NULL;
+	}
+
+	int compa = strcmp(atual->nome, nome);
+
+	if (compa == 0) {
+		return atual;
+	}
+	else {
+		return buscaPorCPF(atual->proximo, nome);
+	}
 }
 
 
@@ -110,10 +106,10 @@ char inserir(Pessoa **pLista, Pessoa *registro)
 	if (*pLista != NULL) {
 		Pessoa* atual = *pLista;
 
-		int compa = strcmp(atual->cpf, registro->cpf);
+		int compa = strcmp(atual->nome, registro->nome);
 
 		if (compa == 0) {
-			printf("Ja existe um CPF cadastrado");
+			printf("Ja existe este nome cadastrado");
 			return '0';
 		}
 		else if (compa < 0) {
@@ -124,7 +120,7 @@ char inserir(Pessoa **pLista, Pessoa *registro)
 			}
 			else
 			{
-				compa = strcmp(atual->proximo->cpf, registro->cpf);
+				compa = strcmp(atual->proximo->nome, registro->nome);
 				if (compa > 0) {
 					registro->proximo = atual->proximo;
 					registro->anterior = atual;
@@ -146,7 +142,7 @@ char inserir(Pessoa **pLista, Pessoa *registro)
 			}
 			else
 			{
-				compa = strcmp(atual->anterior->cpf, registro->cpf);
+				compa = strcmp(atual->anterior->nome, registro->nome);
 				if (compa > 0) {
 					registro->proximo = atual;
 					registro->anterior = atual->anterior;
@@ -163,18 +159,169 @@ char inserir(Pessoa **pLista, Pessoa *registro)
 	else
 	{
 		*pLista = registro;
+		return '1';
+	}
+}
+
+Indice* GetPrimeiro(Indice* indice) {
+	if (indice->anterior != NULL) {
+		return GetPrimeiro(indice->anterior);
+	}
+	return indice;
+}
+
+void ImprimeIndices(Indice* indice) {
+	Indice* atual = NULL;
+	printf("Lista de Pessoas: \n");
+
+	if (indice != NULL) {
+		for (atual = GetPrimeiro(indice); atual != NULL; atual = atual->proximo)
+		{
+			ImprimePessoa(atual->registro);
+		}
+	}
+	else {
+		printf("Ops, parece que a lista esta vazia....\n");
+	}
+	system("pause");
+}
+
+char inserirIndice(Indice **pIndice, Pessoa *registro)
+{
+	if (*pIndice != NULL) {
+		Indice* indiceAtual = *pIndice;
+
+
+		int compa = strcmp(indiceAtual->registro->cpf, registro->cpf);
+		if (compa == 0) {
+			printf("Ja existe este cpf cadastrado");
+			//pensar o que fazer, se retira ou nao o registro 
+			return '0';
+		}
+		else if (compa < 0)
+		{
+			if (indiceAtual->proximo != NULL) {
+				compa = strcmp(indiceAtual->proximo->registro->cpf, registro->cpf);
+				if (compa > 0) {
+					Indice* novo = InicializaIndice(registro);
+					novo->anterior = indiceAtual;
+					novo->proximo = indiceAtual->proximo;
+
+					indiceAtual->proximo = novo;
+					novo->proximo->anterior = novo;
+
+					return '1';
+				}
+				else
+				{
+					inserirIndice(&indiceAtual->proximo, registro);
+				}
+			}
+			else
+			{
+				indiceAtual->proximo = InicializaIndice(registro);
+				indiceAtual->proximo->anterior = indiceAtual;
+				return '1';
+			}
+		}
+		else
+		{
+			if (indiceAtual->anterior != NULL) {
+				compa = strcmp(indiceAtual->anterior->registro->cpf, registro->cpf);
+				if (compa < 0) {
+					Indice* novo = InicializaIndice(registro);
+					novo->proximo = indiceAtual;
+					novo->anterior = indiceAtual->anterior;
+
+					indiceAtual->anterior = novo;
+					novo->anterior->proximo = novo;
+
+					return '1';
+				}
+				else
+				{
+					inserirIndice(&indiceAtual->anterior, registro);
+				}
+			}
+			else
+			{
+				indiceAtual->anterior = InicializaIndice(registro);
+				indiceAtual->anterior->proximo = indiceAtual;
+				return '1';
+			}
+		}
+
+	}
+	else {
+
+		*pIndice = InicializaIndice(registro);
+		return '1';
 	}
 
+	return '0';
+}
 
+void ValidaCPF(char * cpf) {
+
+	int tam = strlen(cpf);
+	char temp[12];
+
+
+	if (tam < 11) {
+
+		int Stam = 11 - tam;
+		int i;
+		for (i = 0; i < Stam; i++)
+		{
+			temp[i] = '0';
+		}
+		for (int j = 0; j <= tam; j++)
+		{
+			temp[i] = cpf[j];
+			i++;
+		}
+		strcpy(cpf, temp);
+	}
 
 }
 
+void PesquisaCpf(Pessoa *pessoa) {
+	char cpf[12];
+	printf("Digite o cpf: \n");
+	scanf("%s", cpf);
+	ValidaCPF(cpf);
+	Pessoa *p = NULL;
+	p = buscaPorCPF(pessoa, cpf);
+	if (p == NULL) {
+		printf("Ops, nao encontramos esse cpf!!!!");
+	}
+	else
+	{
+		ImprimePessoa(p);
+	}
+	system("pause");
+}
 
+void PesquisaPorNome(Pessoa * pessoa) {
+	char nome[100];
+	printf("Digite o nome: \n");
+	scanf("%s", nome);
 
-char inserirIndice(Indice **pIndice, Pessoa *registro);
+	Pessoa * p = NULL;
+	p = BuscaPorNome(pessoa, nome);
+
+	if (p == NULL) {
+		printf("Ops, nao encontramos esse nome!!!!");
+	}
+	else
+	{
+		ImprimePessoa(p);
+	}
+	system("pause");
+}
 
 //implementações
-void cadastrar(Pessoa** listaDupla) {
+void cadastrar(Pessoa** listaDupla, Indice** indice) {
 	Pessoa *pessoa = (Pessoa *)malloc(sizeof(Pessoa));
 
 	pessoa->anterior = NULL;
@@ -182,12 +329,8 @@ void cadastrar(Pessoa** listaDupla) {
 
 	system("cls");
 	printf("Nome:");
-	//fflush(stdin);
-	//fgets(pessoa->nome, sizeof(pessoa->nome), stdin);
 	scanf("%s", &pessoa->nome);
 	printf("CPF:");
-	//fflush(stdin);
-	//fgets(pessoa->cpf, sizeof(pessoa->cpf), stdin);
 	scanf("%s", &pessoa->cpf);
 	printf("Altura:");
 	fflush(stdin);
@@ -197,8 +340,23 @@ void cadastrar(Pessoa** listaDupla) {
 	scanf("%f", &pessoa->peso);
 	fflush(stdin);
 
+	ValidaCPF(pessoa->cpf);
+
+	Pessoa * p = NULL;
+	p = buscaPorCPF(GetPrimeiro(*listaDupla), pessoa->cpf);
+	if (p != NULL) {
+		printf("JA temos esse cpf cadastrado...");
+		return;
+	}
+	p = BuscaPorNome(GetPrimeiro(*listaDupla), pessoa->nome);
+	if (p != NULL) {
+		printf("JA temos esse Nome cadastrado...");
+		return;
+	}
 
 	printf("Inserindo: %c", inserir(listaDupla, pessoa));
+	printf("Inserindo: %c", inserirIndice(indice, pessoa));
+	system("pause");
 
 }
 
@@ -212,9 +370,6 @@ void inicializacao(Pessoa **pLista, Indice **pIndice) {
 	//inicializa os gerador de nЩmeros randЗmicos
 	srand((unsigned)time(NULL));
 
-
-
-	// 
 
 	unsigned char incluidos = 0;
 	do {
@@ -230,10 +385,14 @@ void inicializacao(Pessoa **pLista, Indice **pIndice) {
 		pessoa->altura = altura[x];
 		x = rand() % MAX;
 		pessoa->peso = peso[x];
-		incluidos++;
-
+		pessoa->anterior = NULL;
+		pessoa->proximo = NULL;
+		ValidaCPF(pessoa->cpf);
 		inserir(pLista, pessoa);
-		//inserirIndice(pIndice, pessoa);
+		
+		
+		incluidos++;
+		inserirIndice(pIndice, pessoa);
 
 	} while (incluidos != TAMANHOINICIAL);
 }
@@ -248,15 +407,31 @@ Pessoa* InicializaListaVazia() {
 	return listaDupla;
 }
 
+Indice* InicializaIndice(Pessoa *registro) {
+	Indice* indice = InicializaIndiceVazio();
+	indice->registro = registro;
+
+	return indice;
+}
+
+Indice* InicializaIndiceVazio() {
+	Indice* indice = (Indice *)malloc(sizeof(Indice));
+	indice->registro = NULL;
+	indice->proximo = NULL;
+	indice->anterior = NULL;
+
+	return indice;
+}
+
 //principal
 int main(void) {
 
 	Pessoa *listaDupla = NULL;
 
-	Indice *indiceCPF;
+	Indice *indiceCPF = NULL;
 	char invalida = 'N';
 
-	//	inicializacao(&listaDupla,&indiceCPF);
+	inicializacao(&listaDupla,&indiceCPF);
 	char op;
 	do {
 		system("cls");
@@ -274,19 +449,19 @@ int main(void) {
 		invalida = 'N';
 		switch (op) {
 		case 'I':
-			cadastrar(&listaDupla);
+			cadastrar(&listaDupla, &indiceCPF);
 			break;
 		case 'B':
-
+			PesquisaPorNome(GetPrimeiro(listaDupla));
 			break;
 		case 'C':
-
+			PesquisaCpf(GetPrimeiro(listaDupla));
 			break;
 		case 'N':
-
+			ImprimeCrescente(listaDupla);
 			break;
 		case 'L':
-			ImprimeCrescente(listaDupla);
+			ImprimeIndices(indiceCPF);
 			break;
 		case 27:
 

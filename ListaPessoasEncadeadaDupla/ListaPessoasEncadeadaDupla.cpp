@@ -389,8 +389,8 @@ void inicializacao(Pessoa **pLista, Indice **pIndice) {
 		pessoa->proximo = NULL;
 		ValidaCPF(pessoa->cpf);
 		inserir(pLista, pessoa);
-		
-		
+
+
 		incluidos++;
 		inserirIndice(pIndice, pessoa);
 
@@ -423,6 +423,70 @@ Indice* InicializaIndiceVazio() {
 	return indice;
 }
 
+void ExcluirPorNome(Indice* indice, char* nome) {
+	if (indice != NULL) {
+		Indice* atual = GetPrimeiro(indice);
+		int compa;
+		for (atual = GetPrimeiro(indice); atual != NULL; atual = atual->proximo) {
+			compa = strcmp(atual->registro->nome, nome);
+			if (compa == 0) {
+				if (atual->anterior != NULL) {
+					atual->anterior->proximo = atual->proximo;
+				}
+				if (atual->proximo != NULL) {
+					atual->proximo->anterior = atual->anterior;
+				}
+				Pessoa* p = atual->registro;
+
+				if (p != NULL) {
+					if (p->anterior != NULL) {
+						p->anterior->proximo = p->proximo;
+					}
+					if (p->proximo != NULL) {
+						p->proximo->anterior = p->anterior;
+					}
+					atual->registro == NULL;
+					free(p);
+				}
+				free(atual);
+				break;
+			}
+		}
+	}
+}
+
+void Excluir(Indice* indice, char* cpf) {
+	if (indice != NULL) {
+		Indice* atual = GetPrimeiro(indice);
+		int compa;
+		for (atual = GetPrimeiro(indice); atual != NULL; atual = atual->proximo) {
+			compa = strcmp(atual->registro->cpf, cpf);
+			if (compa == 0) {
+				if (atual->anterior != NULL) {
+					atual->anterior->proximo = atual->proximo;
+				}
+				if (atual->proximo != NULL) {
+					atual->proximo->anterior = atual->anterior;
+				}
+				Pessoa* p = atual->registro;
+
+				if (p != NULL) {
+					if (p->anterior != NULL) {
+						p->anterior->proximo = p->proximo;
+					}
+					if (p->proximo != NULL) {
+						p->proximo->anterior = p->anterior;
+					}
+					atual->registro == NULL;
+					free(p);
+				}
+				free(atual);
+				break;
+			}
+		}
+	}
+}
+
 //principal
 int main(void) {
 
@@ -431,7 +495,7 @@ int main(void) {
 	Indice *indiceCPF = NULL;
 	char invalida = 'N';
 
-	inicializacao(&listaDupla,&indiceCPF);
+	//inicializacao(&listaDupla, &indiceCPF);
 	char op;
 	do {
 		system("cls");
@@ -453,9 +517,19 @@ int main(void) {
 			break;
 		case 'B':
 			PesquisaPorNome(GetPrimeiro(listaDupla));
+			char nomeExclu[12];
+			printf("Digite o cpf: \n");
+			scanf("%s", nomeExclu);
+			
+			ExcluirPorNome(indiceCPF, nomeExclu);
 			break;
 		case 'C':
 			PesquisaCpf(GetPrimeiro(listaDupla));
+			char cpfExclu[12];
+			printf("Digite o cpf: \n");
+			scanf("%s", cpfExclu);
+			ValidaCPF(cpfExclu);
+			Excluir(indiceCPF, cpfExclu);
 			break;
 		case 'N':
 			ImprimeCrescente(listaDupla);
